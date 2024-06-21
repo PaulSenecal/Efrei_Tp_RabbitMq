@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Message Sender</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>Send Message to User2</h1>
+  <form id="messageForm">
+    <input type="text" id="messageInput" placeholder="Enter your message...">
+    <button type="submit">Send</button>
+  </form>
+  <div>
+    <h2>Messages Sent:</h2>
+    <ul id="sentMessages"></ul>
+  </div>
+  <div>
+    <h2>Messages Received:</h2>
+    <ul id="receivedMessages"></ul>
+  </div>
+  <script>
+    const socket = new WebSocket('ws://localhost:3000');
+    socket.onmessage = function(event) {
+      const message = event.data;
+      const messageDiv = document.createElement('li');
+      messageDiv.textContent = message;
+      document.getElementById('receivedMessages').appendChild(messageDiv);
+    };
+    document.getElementById('messageForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+      const message = document.getElementById('messageInput').value;
+      const response = await fetch('/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message })
+      });
+      const data = await response.json();
+      const sentMessageDiv = document.createElement('li');
+      sentMessageDiv.textContent = data.message;
+      document.getElementById('sentMessages').appendChild(sentMessageDiv);
+    });
+  </script>
+</body>
+</html>
